@@ -104,7 +104,7 @@ class ProductRepository implements ProductRepositoryInterface
     public function getNewarrivalProducts(
         \Magento\Framework\Api\SearchCriteriaInterface $criteria
     ) {
-        return $this->getProductsBySource("new_arrival", $criteria);
+        return $this->getProductsBySource($criteria, "new_arrival");
     }
 
     /**
@@ -113,7 +113,7 @@ class ProductRepository implements ProductRepositoryInterface
     public function getLatestProducts(
         \Magento\Framework\Api\SearchCriteriaInterface $criteria
     ) {
-        return $this->getProductsBySource("latest", $criteria);
+        return $this->getProductsBySource($criteria, "latest");
     }
 
     /**
@@ -122,7 +122,7 @@ class ProductRepository implements ProductRepositoryInterface
     public function getSpecialProducts(
         \Magento\Framework\Api\SearchCriteriaInterface $criteria
     ) {
-        return $this->getProductsBySource("special", $criteria);
+        return $this->getProductsBySource($criteria, "special");
     }
 
     /**
@@ -131,7 +131,7 @@ class ProductRepository implements ProductRepositoryInterface
     public function getMostViewedProducts(
         \Magento\Framework\Api\SearchCriteriaInterface $criteria
     ) {
-        return $this->getProductsBySource("most_popular", $criteria);
+        return $this->getProductsBySource($criteria, "most_popular");
     }
 
     /**
@@ -140,7 +140,7 @@ class ProductRepository implements ProductRepositoryInterface
     public function getBestsellerProducts(
         \Magento\Framework\Api\SearchCriteriaInterface $criteria
     ) {
-        return $this->getProductsBySource("best_seller", $criteria);
+        return $this->getProductsBySource($criteria, "best_seller");
     }
 
     /**
@@ -149,7 +149,7 @@ class ProductRepository implements ProductRepositoryInterface
     public function getTopratedProducts(
         \Magento\Framework\Api\SearchCriteriaInterface $criteria
     ) {
-        return $this->getProductsBySource("top_rated", $criteria);
+        return $this->getProductsBySource($criteria, "top_rated");
     }
 
     /**
@@ -158,7 +158,7 @@ class ProductRepository implements ProductRepositoryInterface
     public function getRandomProducts(
         \Magento\Framework\Api\SearchCriteriaInterface $criteria
     ) {
-        return $this->getProductsBySource("random", $criteria);
+        return $this->getProductsBySource($criteria, "random");
     }
 
     /**
@@ -167,7 +167,7 @@ class ProductRepository implements ProductRepositoryInterface
     public function getFeaturedProducts(
         \Magento\Framework\Api\SearchCriteriaInterface $criteria
     ) {
-        return $this->getProductsBySource("featured", $criteria);
+        return $this->getProductsBySource($criteria, "featured");
     }
 
     /**
@@ -176,16 +176,19 @@ class ProductRepository implements ProductRepositoryInterface
     public function getDealsProducts(
         \Magento\Framework\Api\SearchCriteriaInterface $criteria
     ) {
-        return $this->getProductsBySource("deals", $criteria);
+        return $this->getProductsBySource($criteria, "deals");
     }
 
      /**
      * {@inheritdoc}
      */
     public function getProductsBySource(
-        $source_key = "latest",
+        $source_key,
         \Magento\Framework\Api\SearchCriteriaInterface $searchCriteria
     ) {
+        if (!isset($source_key) || empty($source_key)) {
+            $source_key = "latest";
+        }
         $product = $this->productFactory->create();
         $config = [];
         foreach ($searchCriteria->getFilterGroups() as $filterGroup) {
@@ -230,7 +233,7 @@ class ProductRepository implements ProductRepositoryInterface
             break;
         }
         $this->extensionAttributesJoinProcessor->process($collection);
-        
+
         $this->collectionProcessor->process($searchCriteria, $collection);
 
         $collection->load();
@@ -239,7 +242,7 @@ class ProductRepository implements ProductRepositoryInterface
         $searchResult->setSearchCriteria($searchCriteria);
         $searchResult->setItems($collection->getItems());
         $searchResult->setTotalCount($collection->getSize());
-        
+
         foreach ($collection->getItems() as $product) {
             $this->cacheProduct(
                 $this->getCacheKey(
@@ -289,8 +292,8 @@ class ProductRepository implements ProductRepositoryInterface
 
         if ($this->cacheLimit && count($this->instances) > $this->cacheLimit) {
             $offset = round($this->cacheLimit / -2);
-            $this->instancesById = array_slice($this->instancesById, $offset, null, true);
-            $this->instances = array_slice($this->instances, $offset, null, true);
+            $this->instancesById = array_slice($this->instancesById, (int)$offset, null, true);
+            $this->instances = array_slice($this->instances, (int)$offset, null, true);
         }
     }
 

@@ -183,9 +183,12 @@ class ProductRepository implements ProductRepositoryInterface
      * {@inheritdoc}
      */
     public function getProductsBySource(
-        \Magento\Framework\Api\SearchCriteriaInterface $searchCriteria,
-        $source_key = "latest"
+        $source_key,
+        \Magento\Framework\Api\SearchCriteriaInterface $searchCriteria
     ) {
+        if (!isset($source_key) || empty($source_key)) {
+            $source_key = "latest";
+        }
         $product = $this->productFactory->create();
         $config = [];
         foreach ($searchCriteria->getFilterGroups() as $filterGroup) {
